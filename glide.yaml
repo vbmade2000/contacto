@@ -1,0 +1,4 @@
+package: github.com/vbmade2000/contacto
+import:
+- package: github.com/gin-gonic/gin
+  version: ~1.2.0
