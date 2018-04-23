@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/vbmade2000/contacto/config"
 	"github.com/vbmade2000/contacto/handlers"
+	"github.com/vbmade2000/contacto/contact"
 	"net"
 	"os"
 	"strconv"
@@ -12,6 +13,8 @@ import (
 
 func main() {
 	var conf config.Config
+	contactManager := contact.ContactManager{}
+	
 	if config.ConfigExists() == false {
 		fmt.Println("contacto.conf not found. Writing default one...")
 		conf = config.GetDefaultConfig()
@@ -35,10 +38,13 @@ func main() {
 		}
 	}
 
+	contact.InitDB(conf)
+	handlerManager := handlers.HandlerManager{ConMan: contactManager}
+
 	r := gin.Default()
-	r.GET("/contact/:contactID", handlers.GetContact)
-	r.GET("/contacts", handlers.GetContacts)
-	r.POST("/contact", handlers.CreateContact)
-	r.DELETE("/contact/:contactID", handlers.DeleteContact)
+	r.GET("/contact/:contactID", handlerManager.GetContact)
+	r.GET("/contacts", handlerManager.GetContacts)
+	r.POST("/contact", handlerManager.CreateContact)
+	r.DELETE("/contact/:contactID", handlerManager.DeleteContact)
 	r.Run(net.JoinHostPort(conf.Host, strconv.Itoa(conf.ServerPort))) // listen and serve on 0.0.0.0:8080
 }

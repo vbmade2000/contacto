@@ -29,10 +29,16 @@ func WriteConfig(config Config, out io.Writer) error {
 }
 
 func GetDefaultConfig() Config {
+	// Database configuration
+	dbProviderConf := DBProvider{}
+	dbProviderConf.Provider = "sqlite3"
+	dbProviderConf.Host = "contacto.db"
+	
 	conf := Config{}
 	conf.ServerPort = 8080
 	conf.Host = "localhost"
-	conf.DBProvider = "sqlite"
+	conf.DBProvider = "sqlite3"
+	conf.DBProviderConf = []DBProvider{dbProviderConf}
 	return conf
 }
 func ReadConfig(in io.Reader) (Config, error) {

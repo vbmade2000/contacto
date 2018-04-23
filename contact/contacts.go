@@ -1,49 +1,60 @@
 package contact 
 
 import (
-	"errors"
+	"database/sql"
+	"fmt"
+	"github.com/vbmade2000/contacto/database"
+	"github.com/vbmade2000/contacto/config"
+	"github.com/vbmade2000/contacto/interfaces"
 )
 
-// IContact is an interface containing required methods for Contact
-type IContact interface {
 
-	// Getter methods
-	GetId() int
-	GetName() string
-	GetMobile() string
-	GetLandline() string
-	GetAddress() string
-	GetOccupation() string
-	ToJSON() string
-
-	// Setter methods
-        SetName(name string) error
-        SetMobile(mobile string) error
-        SetLandline(landline string) error
-        SetAddress(addresss string) error
-        SetOccupation(occupation string) error
-        FromJSON(json string) IContact
+type ContactManager struct {
+	DbMan database.DBManager
 }
+
+var cm ContactManager
 
 // Struct to hold contact detail
 type Contact struct {
-        id int
-        name string
-        mobile string
-        landline string
-        address string
-        occupation string
+        Id int
+        Name string
+        Address string
+        Email string
+	Phone string
+        Landline string
+        Occupation string
 }
 
-func (con *Contact)SetName(name string) error {
-	if name == "" {
-		return errors.New("Contact name is blank") 
-	}
-	con.name = name
-	return nil
+// ToSQLInsertQuery returns update sql query for Contact
+func (c Contact) ToSQLInsertQuery() (string) {
+	return "This method is not implemented yet"
+}
+
+// ToSQLUpdateQuery returns update sql query for Contact
+func (c Contact) ToSQLUpdateQuery() (string) {
+	return "This method is not implemented yet"
 }
 
 // New returns a new instance of Contact with all the fields blank 
-func NewContact() Contact {
+func New() Contact {
 	return Contact{}	
+}
+func InitDB(conf config.Config) error{
+	dbManager, err := database.GetDatabaseManager(conf)
+	if err!=nil {
+		return err
+	}
+	cm = ContactManager{}
+	cm.DbMan = dbManager
+	return nil
+}
+func (conMan ContactManager) GetContact(contactID int) (interfaces.IContact, error) {
+	row := cm.DbMan.GetContact(contactID)
+	c := Contact{}
+	err := row.Scan(&c.Id, &c.Name, &c.Address, &c.Email, &c.Phone, &c.Landline, &c.Occupation)
+	if err == sql.ErrNoRows {
+		err = fmt.Errorf("Contact not found")
+	}
+	return c, err	
 }
